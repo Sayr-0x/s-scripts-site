@@ -884,11 +884,19 @@
         <div class="form-error" id="error-email">Adresse email invalide.</div>
       </div>
 
-      <div class="modal-separator">puis</div>
+      <button class="btn-stripe" id="btn-stripe" onclick="payWithStripe()" style="width:100%;background:#635bff;color:#fff;border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:all 0.2s;">
+        💳 Payer par carte (Stripe)
+      </button>
 
-      <button class="btn-paypal" id="btn-paypal" onclick="startPayment()">
+      <div class="modal-separator">ou</div>
+
+      <button class="btn-paypal" id="btn-paypal" onclick="payWithPaypal()">
         Payer avec <b>PayPal</b>
       </button>
+
+      <div id="paypal-instructions" style="display:none;background:rgba(255,196,57,0.1);border:1px solid rgba(255,196,57,0.3);border-radius:8px;padding:12px;margin-top:10px;font-size:12px;color:#ffc439;text-align:center;">
+        ⚠️ <b>Important :</b> Après le paiement PayPal, ta licence sera envoyée par email sous 30 minutes maximum.
+      </div>
 
       <div class="modal-secure">
         🔒 Paiement sécurisé · Licence liée à ton CFX · Livraison immédiate
@@ -944,51 +952,61 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
   }
 
-  async function startPayment() {
+  function validateInputs() {
     const cfx   = document.getElementById('input-cfx').value.trim();
     const email = document.getElementById('input-email').value.trim();
     let ok = true;
-
     document.getElementById('error-cfx').style.display   = 'none';
     document.getElementById('error-email').style.display = 'none';
+    if (!validateCfx(cfx))   { document.getElementById('error-cfx').style.display   = 'block'; ok = false; }
+    if (!validateEmail(email)){ document.getElementById('error-email').style.display = 'block'; ok = false; }
+    return ok;
+  }
 
-    if (!validateCfx(cfx)) {
-      document.getElementById('error-cfx').style.display = 'block';
-      ok = false;
-    }
-    if (!validateEmail(email)) {
-      document.getElementById('error-email').style.display = 'block';
-      ok = false;
-    }
-    if (!ok) return;
-
-    // Appel à l'API de licence
-    const btn = document.getElementById('btn-paypal');
+  async function payWithStripe() {
+    if (!validateInputs()) return;
+    const cfx   = document.getElementById('input-cfx').value.trim();
+    const email = document.getElementById('input-email').value.trim();
+    const btn   = document.getElementById('btn-stripe');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Connexion à PayPal...';
-
+    btn.innerHTML = '<span class="spinner"></span> Redirection...';
     try {
-      const res = await fetch('https://s-scripts-api.onrender.com/checkout', {
+      const res  = await fetch('https://s-scripts-api.onrender.com/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cfx, email, product: currentProduct.id, price: currentProduct.price })
+        body: JSON.stringify({ cfx, email, product: currentProduct.id })
       });
       const data = await res.json();
+      if (data.stripe_url) { window.location.href = data.stripe_url; }
+      else { alert('Erreur : ' + (data.error || 'Erreur Stripe')); btn.disabled = false; btn.innerHTML = '💳 Payer par carte (Stripe)'; }
+    } catch(e) { alert('Erreur de connexion.'); btn.disabled = false; btn.innerHTML = '💳 Payer par carte (Stripe)'; }
+  }
 
+  async function payWithPaypal() {
+    if (!validateInputs()) return;
+    const cfx   = document.getElementById('input-cfx').value.trim();
+    const email = document.getElementById('input-email').value.trim();
+    const btn   = document.getElementById('btn-paypal');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Préparation...';
+    try {
+      const res  = await fetch('https://s-scripts-api.onrender.com/paypal/intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cfx, email, product: currentProduct.id })
+      });
+      const data = await res.json();
       if (data.paypal_url) {
-        // Redirige vers PayPal
-        window.location.href = data.paypal_url;
-      } else {
-        alert('Erreur : ' + (data.error || 'Impossible de joindre le serveur de paiement.'));
+        // Afficher instructions avant redirection
+        document.getElementById('paypal-instructions').style.display = 'block';
+        setTimeout(() => { window.open(data.paypal_url, '_blank'); }, 1500);
         btn.disabled = false;
         btn.innerHTML = 'Payer avec <b>PayPal</b>';
-      }
-    } catch(e) {
-      alert('Erreur de connexion. Réessaie dans quelques instants.');
-      btn.disabled = false;
-      btn.innerHTML = 'Payer avec <b>PayPal</b>';
-    }
+      } else { alert('Erreur : ' + (data.error || 'Erreur PayPal')); btn.disabled = false; btn.innerHTML = 'Payer avec <b>PayPal</b>'; }
+    } catch(e) { alert('Erreur de connexion.'); btn.disabled = false; btn.innerHTML = 'Payer avec <b>PayPal</b>'; }
   }
+
+  async function startPayment() { await payWithStripe(); }
 
   // Vérifier si retour PayPal avec succès
   const urlParams = new URLSearchParams(window.location.search);
