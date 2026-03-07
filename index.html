@@ -872,8 +872,8 @@
 
       <div class="form-group">
         <label>Ton identifiant CFX (license:...)</label>
-        <input type="text" id="input-cfx" placeholder="license:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
-        <div class="form-hint">Trouve-le dans ta console FiveM avec la commande <code style="color:var(--blue)">status</code>, ou dans ton txAdmin.</div>
+        <input type="text" id="input-cfx" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+        <div class="form-hint">Trouve-le dans ta console FiveM avec la commande <code style="color:var(--blue)">status</code> (sans le "license:" devant).</div>
         <div class="form-error" id="error-cfx">Identifiant CFX invalide. Format : license:xxxxxxx</div>
       </div>
 
@@ -935,7 +935,12 @@
   }
 
   function validateCfx(v) {
-    return /^license:[a-f0-9]{30,50}$/i.test(v.trim());
+    const clean = v.trim().replace(/^license:/i, '');
+    return /^[a-f0-9]{30,50}$/i.test(clean);
+  }
+  function normalizeCfx(v) {
+    const clean = v.trim().replace(/^license:/i, '');
+    return 'license:' + clean;
   }
 
   function validateEmail(v) {
@@ -943,7 +948,7 @@
   }
 
   async function startPayment() {
-    const cfx   = document.getElementById('input-cfx').value.trim();
+    const cfx   = normalizeCfx(document.getElementById('input-cfx').value.trim());
     const email = document.getElementById('input-email').value.trim();
     let ok = true;
     document.getElementById('error-cfx').style.display   = 'none';
