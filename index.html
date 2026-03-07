@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>S-Scripts — Scripts FiveM Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #080a0f;
+      --bg2:      #0e1118;
+      --bg3:      #141820;
+      --panel:    #181d28;
+      --border:   rgba(255,255,255,0.07);
+      --blue:     #3b82f6;
+      --blue2:    #1d4ed8;
+      --cyan:     #06b6d4;
+      --green:    #22c55e;
+      --red:      #ef4444;
+      --text:     #f0f2f7;
+      --muted:    #6b7280;
+      --accent:   #3b82f6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Grid background ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      background: rgba(8,10,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-logo .s { color: var(--blue); }
+    .nav-logo .dash { color: var(--muted); font-weight: 400; }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
+    }
+    .nav-cta:hover { background: var(--blue2); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px 24px 60px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero h1 {
+      font-size: clamp(52px, 8vw, 96px);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -3px;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+      animation: fadeUp 0.6s 0.2s ease both;
+      font-weight: 400;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 0 24px rgba(59,130,246,0.3);
+    }
+    .btn-primary:hover {
+      background: var(--blue2);
+      transform: translateY(-2px);
+      box-shadow: 0 0 32px rgba(59,130,246,0.45);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04);
+      transform: translateY(-2px);
+    }
+
+    /* Glow central */
+    .hero-glow {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Stats */
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      margin-top: 64px;
+      justify-content: center;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+    }
+    .stat-num span { color: var(--blue); }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECTION SCRIPTS ── */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 48px;
+    }
+
+    /* ── CARDS SCRIPTS ── */
+    .scripts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    .script-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .script-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .script-card:hover {
+      border-color: rgba(59,130,246,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .script-card:hover::before { opacity: 1; }
+
+    .script-card.featured {
+      border-color: rgba(59,130,246,0.25);
+      background: linear-gradient(135deg, rgba(59,130,246,0.06), var(--panel));
+    }
+    .script-card.featured::before { opacity: 1; }
+
+    .card-badge {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .badge-new { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+    .badge-hot { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .badge-soon { background: rgba(107,114,128,0.15); color: var(--muted); border: 1px solid rgba(107,114,128,0.2); }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .card-version {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .card-features {
+      list-style: none;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-features li {
+      font-size: 12px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-features li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-price {
+      font-size: 24px;
+      font-weight: 800;
+      font-family: 'Space Mono', monospace;
+      color: var(--text);
+    }
+    .card-price sup { font-size: 14px; color: var(--muted); vertical-align: top; margin-top: 6px; display: inline-block; }
+    .card-price .cents { font-size: 14px; color: var(--muted); }
+
+    .btn-buy {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-buy:hover { background: var(--blue2); transform: translateY(-1px); }
+    .btn-buy:disabled, .btn-buy.disabled {
+      background: var(--bg3);
+      color: var(--muted);
+      cursor: not-allowed;
+      transform: none;
+      border: 1px solid var(--border);
+    }
+
+    /* ── MODAL ACHAT ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--panel);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 16px;
+      padding: 36px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+      animation: modalIn 0.25s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .modal-title { font-size: 22px; font-weight: 800; }
+    .modal-close {
+      background: none; border: none;
+      color: var(--muted); font-size: 22px;
+      cursor: pointer; padding: 0;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-product {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-product-name { font-weight: 700; font-size: 15px; }
+    .modal-product-price {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .form-group input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Space Mono', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--blue); }
+    .form-group input::placeholder { color: var(--muted); }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    .form-error {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 5px;
+      display: none;
+    }
+
+    .modal-separator {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 20px 0;
+      position: relative;
+    }
+    .modal-separator::before, .modal-separator::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: calc(50% - 30px);
+      height: 1px;
+      background: var(--border);
+    }
+    .modal-separator::before { left: 0; }
+    .modal-separator::after { right: 0; }
+
+    .btn-paypal {
+      width: 100%;
+      background: #ffc439;
+      color: #003087;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-paypal:hover { background: #f0b429; transform: translateY(-1px); }
+    .btn-paypal:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .modal-secure {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    /* Step 2 : confirmation */
+    .modal-step { display: none; }
+    .modal-step.active { display: block; }
+
+    .success-icon {
+      text-align: center;
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .success-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--green);
+    }
+    .success-sub {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .feature-card:hover { border-color: rgba(59,130,246,0.2); }
+    .feature-icon { font-size: 26px; margin-bottom: 14px; }
+    .feature-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-logo { font-weight: 800; font-size: 16px; }
+    .footer-logo .s { color: var(--blue); }
+
+    /* ── LOADER ── */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span class="s">S</span><span class="dash">-</span>Scripts</div>
+  <ul class="nav-links">
+    <li><a href="#scripts">Scripts</a></li>
+    <li><a href="#features">Garanties</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#scripts" class="nav-cta">Voir les scripts →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">Scripts FiveM Premium · Livraison instantanée</div>
+  <h1>Scripts <span class="highlight">FiveM</span><br/>sur mesure</h1>
+  <p class="hero-sub">Des scripts développés pour les serveurs FRP exigeants. Licence CFX incluse, mises à jour automatiques, support inclus.</p>
+  <div class="hero-buttons">
+    <a href="#scripts" class="btn-primary">🛒 Voir les scripts</a>
+    <a href="#features" class="btn-secondary">En savoir plus</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">2<span>+</span></div>
+      <div class="stat-label">Scripts disponibles</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100<span>%</span></div>
+      <div class="stat-label">Licence CFX</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">24<span>h</span></div>
+      <div class="stat-label">Support max</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<section id="scripts">
+  <div class="section-label">Catalogue</div>
+  <div class="section-title">Nos scripts</div>
+  <p class="section-sub">Chaque script est protégé par Escrow CFX et inclut les mises à jour.</p>
+
+  <div class="scripts-grid">
+
+    <!-- Tablette FDO -->
+    <div class="script-card featured">
+      <span class="card-badge badge-hot">⭐ Populaire</span>
+      <div class="card-icon">💼</div>
+      <div class="card-name">Tablette FDO</div>
+      <div class="card-version">v1.0.0 · ESX / QBCore</div>
+      <p class="card-desc">Interface tablette complète pour les forces de l'ordre. Registre citoyen, SIV, MCPN, Bureau des plaintes, CIC géolocalisation et plus.</p>
+      <ul class="card-features">
+        <li>Registre citoyen & SIV intégrés</li>
+        <li>Gestion des patrouilles MCPN</li>
+        <li>Bureau des plaintes (C.R.I)</li>
+        <li>Géolocalisation temps réel (CIC)</li>
+        <li>Interface Police & Gendarmerie</li>
+        <li>Mises à jour automatiques</li>
+      </ul>
+      <div class="card-footer">
+        <div class="card-price"><sup>€</sup>24<span class="cents">,99</span></div>
+        <button class="btn-buy" onclick="openModal('Tablette FDO', '24.99', 'tablette-fdo')">🛒 Acheter</button>
+      </div>
+    </div>
+
+    <!-- BER -->
+    <div class="script-card">
+      <span class="card-badge badge-new">Nouveau</span>
+      <div class="card-icon">📻</div>
+      <div class="card-name">BER TETRAPOL</div>
+      <div class="card-version">v1.0.0 · ESX / QBCore</div>
+      <p class="card-desc">Radio embarquée TETRAPOL réaliste. Interface fidèle au matériel réel, synchronisée avec la tablette FDO. Patrouilles, canaux, statuts.</p>
+      <ul class="card-features">
+        <li>Design EADS TETRAPOL fidèle</li>
+        <li>Sync avec Tablette FDO</li>
+        <li>Canaux Police & Gendarmerie</li>
+        <li>Patrouilles temps réel</li>
+        <li>GPS embarqué</li>
+      </ul>
+      <div class="card-footer">
+        <div class="card-price"><sup>€</sup>14<span class="cents">,99</span></div>
+        <button class="btn-buy" onclick="openModal('BER TETRAPOL', '14.99', 'ber-tetrapol')">🛒 Acheter</button>
+      </div>
+    </div>
+
+    <!-- Pack bundle -->
+    <div class="script-card">
+      <span class="card-badge badge-new">-30%</span>
+      <div class="card-icon">📦</div>
+      <div class="card-name">Pack Complet FDO</div>
+      <div class="card-version">Tablette + BER · Bundle</div>
+      <p class="card-desc">La Tablette FDO et le BER TETRAPOL réunis dans un pack à prix réduit. La solution complète pour ton serveur FRP.</p>
+      <ul class="card-features">
+        <li>Tablette FDO complète</li>
+        <li>BER TETRAPOL</li>
+        <li>Synchronisation native</li>
+        <li>Support prioritaire</li>
+        <li>Économise 10€</li>
+      </ul>
+      <div class="card-footer">
+        <div class="card-price"><sup>€</sup>27<span class="cents">,99</span></div>
+        <button class="btn-buy" onclick="openModal('Pack Complet FDO', '27.99', 'pack-fdo')">🛒 Acheter</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES / GARANTIES -->
+<section id="features" style="padding-top: 40px;">
+  <div class="section-label">Pourquoi S-Scripts</div>
+  <div class="section-title">Ce qui est inclus</div>
+  <p class="section-sub">Chaque achat vient avec des garanties sérieuses.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔐</div>
+      <div class="feature-title">Licence CFX Escrow</div>
+      <p class="feature-desc">Ton script est lié à ton identifiant CFX. Il ne fonctionnera que sur ton serveur. Protection anti-leak totale.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Livraison instantanée</div>
+      <p class="feature-desc">Dès le paiement confirmé, tu reçois un email avec ton lien de téléchargement et ta clé de licence.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <div class="feature-title">Mises à jour incluses</div>
+      <p class="feature-desc">Toutes les mises à jour futures sont incluses dans ton achat. Ton serveur reste à jour automatiquement.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛠️</div>
+      <div class="feature-title">Support Discord</div>
+      <p class="feature-desc">Un ticket Discord dédié pour t'aider à installer et configurer. Réponse sous 24h maximum.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎮</div>
+      <div class="feature-title">ESX & QBCore</div>
+      <p class="feature-desc">Compatible avec les deux frameworks les plus populaires. Détection automatique au démarrage.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <div class="feature-title">Code documenté</div>
+      <p class="feature-desc">La config est claire et commentée. Tu peux adapter les paramètres sans toucher au code source.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="padding-top: 40px; padding-bottom: 100px;">
+  <div class="section-label">Contact</div>
+  <div class="section-title">Une question ?</div>
+  <p class="section-sub">Rejoins le Discord ou envoie un message avant d'acheter.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;">
+    <a href="#" class="btn-primary">💬 Discord S-Scripts</a>
+    <a href="#" class="btn-secondary">📧 Email</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><span class="s">S</span>-Scripts</div>
+  <div>Scripts FiveM Premium — Licence CFX Escrow</div>
+  <div>© 2025 S-Scripts · Tous droits réservés</div>
+</footer>
+
+<!-- ═══ MODAL ACHAT ═══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+
+    <!-- Step 1 : Formulaire -->
+    <div class="modal-step active" id="step1">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Finaliser l'achat</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Paiement sécurisé via PayPal</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-product">
+        <div>
+          <div class="modal-product-name" id="modal-product-name">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Licence CFX incluse · Livraison par email</div>
+        </div>
+        <div class="modal-product-price" id="modal-product-price">—</div>
+      </div>
+
+      <div class="form-group">
+        <label>Ton identifiant CFX (license:...)</label>
+        <input type="text" id="input-cfx" placeholder="license:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+        <div class="form-hint">Trouve-le dans ta console FiveM avec la commande <code style="color:var(--blue)">status</code>, ou dans ton txAdmin.</div>
+        <div class="form-error" id="error-cfx">Identifiant CFX invalide. Format : license:xxxxxxx</div>
+      </div>
+
+      <div class="form-group">
+        <label>Ton email</label>
+        <input type="email" id="input-email" placeholder="toi@exemple.com"/>
+        <div class="form-hint">Tu recevras ton script et ta clé de licence à cette adresse.</div>
+        <div class="form-error" id="error-email">Adresse email invalide.</div>
+      </div>
+
+      <div class="modal-separator">puis</div>
+
+      <button class="btn-paypal" id="btn-paypal" onclick="startPayment()">
+        Payer avec <b>PayPal</b>
+      </button>
+
+      <div class="modal-secure">
+        🔒 Paiement sécurisé · Licence liée à ton CFX · Livraison immédiate
+      </div>
+    </div>
+
+    <!-- Step 2 : Succès -->
+    <div class="modal-step" id="step2">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Commande confirmée !</div>
+      <p class="success-sub">
+        Ton paiement a bien été reçu.<br/>
+        Ta licence a été générée et liée à ton identifiant CFX.<br/><br/>
+        <b>Vérifie ta boîte mail</b> — tu vas recevoir le lien de téléchargement et les instructions d'installation dans les prochaines minutes.
+      </p>
+      <button class="btn-primary" onclick="closeModal()" style="width:100%;margin-top:24px;justify-content:center;">Fermer</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let currentProduct = {};
+
+  function openModal(name, price, id) {
+    currentProduct = { name, price, id };
+    document.getElementById('modal-product-name').textContent  = name;
+    document.getElementById('modal-product-price').textContent = `${price} €`;
+    document.getElementById('input-cfx').value   = '';
+    document.getElementById('input-email').value = '';
+    document.getElementById('error-cfx').style.display   = 'none';
+    document.getElementById('error-email').style.display = 'none';
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  function validateCfx(v) {
+    return /^license:[a-f0-9]{30,50}$/i.test(v.trim());
+  }
+
+  function validateEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  }
+
+  async function startPayment() {
+    const cfx   = document.getElementById('input-cfx').value.trim();
+    const email = document.getElementById('input-email').value.trim();
+    let ok = true;
+
+    document.getElementById('error-cfx').style.display   = 'none';
+    document.getElementById('error-email').style.display = 'none';
+
+    if (!validateCfx(cfx)) {
+      document.getElementById('error-cfx').style.display = 'block';
+      ok = false;
+    }
+    if (!validateEmail(email)) {
+      document.getElementById('error-email').style.display = 'block';
+      ok = false;
+    }
+    if (!ok) return;
+
+    // Appel à l'API de licence
+    const btn = document.getElementById('btn-paypal');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Connexion à PayPal...';
+
+    try {
+      const res = await fetch('https://TON-API.onrender.com/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cfx, email, product: currentProduct.id, price: currentProduct.price })
+      });
+      const data = await res.json();
+
+      if (data.paypal_url) {
+        // Redirige vers PayPal
+        window.location.href = data.paypal_url;
+      } else {
+        alert('Erreur : ' + (data.error || 'Impossible de joindre le serveur de paiement.'));
+        btn.disabled = false;
+        btn.innerHTML = 'Payer avec <b>PayPal</b>';
+      }
+    } catch(e) {
+      alert('Erreur de connexion. Réessaie dans quelques instants.');
+      btn.disabled = false;
+      btn.innerHTML = 'Payer avec <b>PayPal</b>';
+    }
+  }
+
+  // Vérifier si retour PayPal avec succès
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('success') === '1') {
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+</script>
+
+</body>
+</html>
