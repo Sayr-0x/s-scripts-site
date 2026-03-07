@@ -968,7 +968,7 @@
     btn.innerHTML = '<span class="spinner"></span> Connexion à PayPal...';
 
     try {
-      const res = await fetch('https://TON-API.onrender.com/checkout', {
+      const res = await fetch('https://s-scripts-api.onrender.com/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cfx, email, product: currentProduct.id, price: currentProduct.price })
